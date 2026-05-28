@@ -1,3 +1,24 @@
+const allSkillChoices = [
+  'Acrobacias',
+  'Arcanos',
+  'Atletismo',
+  'Engaño',
+  'Historia',
+  'Interpretación',
+  'Intimidación',
+  'Investigación',
+  'Juego de Manos',
+  'Medicina',
+  'Naturaleza',
+  'Percepción',
+  'Perspicacia',
+  'Persuasión',
+  'Religión',
+  'Sigilo',
+  'Supervivencia',
+  'Trato con Animales',
+];
+
 export const racesSeed = [
   {
     name: 'Enano',
@@ -79,6 +100,8 @@ export const racesSeed = [
           'Idioma adicional',
         ],
         languages: [],
+        skillChoices: allSkillChoices,
+        numberOfSkillChoices: 1,
         imageUrl: null,
       },
       {
@@ -323,6 +346,8 @@ export const racesSeed = [
       'Ascendencia Feérica',
       'Versatilidad con Habilidades',
     ],
+    skillChoices: allSkillChoices,
+    numberOfSkillChoices: 2,
     subraces: [],
     imageUrl: null,
   },
@@ -346,6 +371,7 @@ export const racesSeed = [
       'Resistencia Incansable',
       'Ataques Salvajes',
     ],
+    skillProficiencies: ['Intimidación'],
     subraces: [],
     imageUrl: null,
   },

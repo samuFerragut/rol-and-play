@@ -99,14 +99,26 @@
                 >
                   <h4>{{ selectedRace.selectionLabel || 'Subraza' }}</h4>
 
-                  <div class="subrace-carousel">
+                  <div
+                    ref="subraceCarouselRef"
+                    class="subrace-carousel"
+                    @click.stop
+                    @pointerdown.stop="startSubraceDrag"
+                    @pointermove.stop="moveSubraceDrag"
+                    @pointerup.stop="finishSubraceDrag"
+                    @pointercancel.stop="finishSubraceDrag"
+                    @pointerleave.stop="finishSubraceDrag"
+                    @touchstart.stop
+                    @touchmove.stop
+                  >
                     <button
                       v-for="subrace in selectedRace.subraces"
                       :key="subrace.slug"
                       type="button"
+                      :data-slug="subrace.slug"
                       class="subrace-chip"
                       :class="{ selected: form.subraceSlug === subrace.slug }"
-                      @click.stop="form.subraceSlug = subrace.slug"
+                      @click.stop="selectSubrace(subrace.slug)"
                     >
                       <strong>{{ subrace.name }}</strong>
                       <small>{{ formatAbilityBonuses(subrace.abilityBonuses) }}</small>
@@ -130,7 +142,7 @@
             title="Elige una clase"
             :items="contentStore.classes"
             :selected-id="form.classId"
-            @select="form.classId = $event"
+            @select="handleClassSelect"
           >
             <template #details="{ isSelected }">
               <div
@@ -146,6 +158,32 @@
                   <h4>Competencias</h4>
                   <p>{{ classProficienciesSummary }}</p>
                 </div>
+
+                <div
+                  v-if="selectedClass.subclasses.length"
+                  class="subrace-picker"
+                >
+                  <h4>{{ selectedClass.subclassSelectionLabel || 'Subclase' }} disponible al nivel {{ selectedClass.subclassLevel }}</h4>
+
+                  <div
+                    class="subclass-preview-list"
+                    @click.stop
+                    @pointerdown.stop
+                    @pointermove.stop
+                    @touchstart.stop
+                    @touchmove.stop
+                  >
+                    <button
+                      v-for="subclass in selectedClass.subclasses"
+                      :key="subclass.slug"
+                      type="button"
+                      class="subclass-preview-chip"
+                    >
+                      <strong>{{ subclass.name }}</strong>
+                      <small>{{ subclass.description }}</small>
+                    </button>
+                  </div>
+                </div>
               </div>
             </template>
           </SelectionGrid>
@@ -155,7 +193,7 @@
             title="Elige un trasfondo"
             :items="contentStore.backgrounds"
             :selected-id="form.backgroundId"
-            @select="form.backgroundId = $event"
+            @select="handleBackgroundSelect"
           >
             <template #details="{ isSelected }">
               <div
@@ -206,6 +244,127 @@
                 </div>
               </v-col>
             </v-row>
+
+            <div class="character-options-grid mt-6">
+              <section class="option-panel">
+                <h3>Idiomas</h3>
+
+                <div
+                  v-if="knownLanguages.length"
+                  class="chip-row"
+                >
+                  <span
+                    v-for="language in knownLanguages"
+                    :key="language"
+                    class="info-chip locked"
+                  >
+                    {{ language }}
+                  </span>
+                </div>
+
+                <v-select
+                  v-if="languageChoiceSlots > 0"
+                  v-model="form.languageChoices"
+                  :items="availableLanguageOptions"
+                  :label="`Elige ${languageChoiceSlots} idioma${languageChoiceSlots > 1 ? 's' : ''}`"
+                  multiple
+                  chips
+                  closable-chips
+                  variant="outlined"
+                  class="rp-input mt-3"
+                  hide-details="auto"
+                  :counter="languageChoiceSlots"
+                  @update:model-value="trimLanguageChoices"
+                />
+              </section>
+
+              <section class="option-panel">
+                <h3>Rasgos de raza</h3>
+
+                <div class="chip-row">
+                  <span
+                    v-for="trait in racialTraits"
+                    :key="trait"
+                    class="info-chip"
+                  >
+                    {{ trait }}
+                  </span>
+                </div>
+              </section>
+
+              <section class="option-panel">
+                <h3>Habilidades</h3>
+
+                <v-select
+                  v-if="skillChoiceSlots > 0"
+                  v-model="form.skillChoices"
+                  :items="availableSkillOptions"
+                  :label="`Elige ${skillChoiceSlots} habilidad${skillChoiceSlots > 1 ? 'es' : ''}`"
+                  multiple
+                  chips
+                  closable-chips
+                  variant="outlined"
+                  class="rp-input mb-3"
+                  hide-details="auto"
+                  :counter="skillChoiceSlots"
+                  @update:model-value="trimSkillChoices"
+                />
+
+                <div class="chip-row">
+                  <span
+                    v-for="skill in fixedSkillProficiencies"
+                    :key="skill"
+                    class="info-chip locked"
+                  >
+                    {{ skill }}
+                  </span>
+                </div>
+              </section>
+
+              <section class="option-panel equipment-panel">
+                <h3>Equipo inicial</h3>
+
+                <div
+                  v-for="group in equipmentGroups"
+                  :key="group.key"
+                  class="equipment-choice"
+                >
+                  <span>{{ group.label }}</span>
+
+                  <div
+                    v-if="group.options.length > 1"
+                    class="equipment-toggle"
+                  >
+                    <button
+                      v-for="option in group.options"
+                      :key="option"
+                      type="button"
+                      class="choice-pill"
+                      :class="{ selected: form.equipmentSelections[group.key] === option }"
+                      @click="form.equipmentSelections[group.key] = option"
+                    >
+                      {{ option }}
+                    </button>
+                  </div>
+
+                  <span
+                    v-else
+                    class="info-chip locked"
+                  >
+                    {{ group.options[0] }}
+                  </span>
+                </div>
+              </section>
+            </div>
+
+            <v-alert
+              v-if="errorMessage"
+              type="error"
+              variant="tonal"
+              class="mt-4"
+            >
+              {{ errorMessage }}
+            </v-alert>
           </div>
 
           <div
@@ -292,6 +451,15 @@ const charactersStore = useCharactersStore();
 
 const currentStep = ref(1);
 const errorMessage = ref('');
+const subraceCarouselRef = ref<HTMLElement | null>(null);
+
+const subraceDrag = reactive({
+  active: false,
+  moved: false,
+  startX: 0,
+  scrollLeft: 0,
+  suppressClick: false,
+});
 
 const stepTitles = [
   'Identidad',
@@ -314,6 +482,9 @@ const form = reactive({
   backgroundId: '',
   alignment: '',
   appearance: '',
+  languageChoices: [] as string[],
+  skillChoices: [] as string[],
+  equipmentSelections: {} as Record<string, string>,
   abilities: {
     strength: 10,
     dexterity: 10,
@@ -343,6 +514,25 @@ const abilityLabels: Record<AbilityKey, string> = {
   wisdom: 'Sabiduría',
   charisma: 'Carisma',
 };
+
+const allLanguages = [
+  'Común',
+  'Enano',
+  'Élfico',
+  'Gigante',
+  'Gnómico',
+  'Goblin',
+  'Mediano',
+  'Orco',
+  'Abisal',
+  'Celestial',
+  'Dracónico',
+  'Habla profunda',
+  'Infernal',
+  'Primordial',
+  'Silvano',
+  'Infracomún',
+];
 
 const selectedRace = computed(() =>
   contentStore.races.find((race) => race._id === form.raceId),
@@ -415,6 +605,90 @@ const backgroundProficienciesSummary = computed(() => {
     .join(' · ');
 });
 
+const knownLanguages = computed(() =>
+  uniqueValues([
+    ...fixedLanguages(selectedRace.value?.languages),
+    ...fixedLanguages(selectedSubrace.value?.languages),
+  ]),
+);
+
+const languageChoiceSlots = computed(
+  () =>
+    countLanguageChoices(selectedRace.value?.languages) +
+    countLanguageChoices(selectedSubrace.value?.languages) +
+    countLanguageChoices(selectedBackground.value?.proficiencies.languages),
+);
+
+const availableLanguageOptions = computed(() =>
+  allLanguages.filter((language) => !knownLanguages.value.includes(language)),
+);
+
+const finalLanguages = computed(() =>
+  uniqueValues([
+    ...knownLanguages.value,
+    ...form.languageChoices.slice(0, languageChoiceSlots.value),
+  ]),
+);
+
+const racialTraits = computed(() =>
+  uniqueValues([
+    ...(selectedRace.value?.traits || []),
+    ...(selectedSubrace.value?.traits || []),
+  ]),
+);
+
+const fixedSkillProficiencies = computed(() =>
+  uniqueValues([
+    ...(selectedRace.value?.skillProficiencies || []),
+    ...(selectedSubrace.value?.skillProficiencies || []),
+    ...(selectedBackground.value?.proficiencies.skills || []),
+  ]),
+);
+
+const skillChoiceSlots = computed(
+  () =>
+    (selectedRace.value?.numberOfSkillChoices || 0) +
+    (selectedSubrace.value?.numberOfSkillChoices || 0) +
+    (selectedClass.value?.proficiencies.numberOfSkillChoices || 0),
+);
+
+const skillChoicePool = computed(() =>
+  uniqueValues([
+    ...(selectedRace.value?.skillChoices || []),
+    ...(selectedSubrace.value?.skillChoices || []),
+    ...(selectedClass.value?.proficiencies.skillChoices || []),
+  ]),
+);
+
+const availableSkillOptions = computed(() =>
+  skillChoicePool.value.filter(
+    (skill) =>
+      !fixedSkillProficiencies.value.includes(skill) &&
+      !form.skillChoices.includes(skill),
+  ),
+);
+
+const skillProficiencies = computed(() =>
+  uniqueValues([
+    ...fixedSkillProficiencies.value,
+    ...form.skillChoices.slice(0, skillChoiceSlots.value),
+  ]),
+);
+
+const equipmentGroups = computed(() =>
+  (selectedClass.value?.startingEquipmentChoices || []).map((group, index) => ({
+    key: `equipment-${index}`,
+    label: group.label,
+    options: group.options,
+  })),
+);
+
+const selectedEquipment = computed(() =>
+  equipmentGroups.value
+    .map((group) => form.equipmentSelections[group.key] || group.options[0])
+    .filter(Boolean),
+);
+
 onMounted(async () => {
   await contentStore.fetchContent();
 });
@@ -424,6 +698,169 @@ function handleRaceSelect(raceId: string) {
 
   const race = contentStore.races.find((item) => item._id === raceId);
   form.subraceSlug = race?.subraces[0]?.slug || '';
+  trimSkillChoices();
+}
+
+function handleClassSelect(classId: string) {
+  form.classId = classId;
+  trimSkillChoices();
+  setDefaultEquipmentSelections();
+}
+
+function handleBackgroundSelect(backgroundId: string) {
+  form.backgroundId = backgroundId;
+  trimLanguageChoices();
+  trimSkillChoices();
+}
+
+function selectSubrace(slug: string) {
+  if (subraceDrag.suppressClick) return;
+
+  form.subraceSlug = slug;
+}
+
+function startSubraceDrag(event: PointerEvent) {
+  const target = event.currentTarget;
+
+  if (!(target instanceof HTMLElement)) return;
+
+  subraceDrag.active = true;
+  subraceDrag.moved = false;
+  subraceDrag.startX = event.clientX;
+  subraceDrag.scrollLeft = target.scrollLeft;
+  target.setPointerCapture?.(event.pointerId);
+}
+
+function moveSubraceDrag(event: PointerEvent) {
+  const target = event.currentTarget;
+
+  if (!subraceDrag.active || !(target instanceof HTMLElement)) return;
+
+  const delta = event.clientX - subraceDrag.startX;
+
+  if (Math.abs(delta) > 4) {
+    subraceDrag.moved = true;
+  }
+
+  target.scrollLeft = subraceDrag.scrollLeft - delta;
+}
+
+function finishSubraceDrag(event: PointerEvent) {
+  const target = event.currentTarget;
+
+  if (!(target instanceof HTMLElement) || !subraceDrag.active) return;
+
+  target.releasePointerCapture?.(event.pointerId);
+
+  if (subraceDrag.moved) {
+    selectCenteredSubrace(target);
+    subraceDrag.suppressClick = true;
+
+    window.setTimeout(() => {
+      subraceDrag.suppressClick = false;
+    });
+  } else {
+    selectSubraceAtPoint(event.clientX, event.clientY);
+  }
+
+  subraceDrag.active = false;
+}
+
+function selectSubraceAtPoint(x: number, y: number) {
+  const element = document.elementFromPoint(x, y);
+  const chip = element?.closest<HTMLElement>('.subrace-chip');
+  const slug = chip?.dataset.slug;
+
+  if (slug) {
+    form.subraceSlug = slug;
+  }
+}
+
+function selectCenteredSubrace(container: HTMLElement) {
+  const chips = Array.from(
+    container.querySelectorAll<HTMLElement>('.subrace-chip'),
+  );
+
+  const containerCenter = container.scrollLeft + container.clientWidth / 2;
+  const closestChip = chips.reduce<HTMLElement | null>((closest, chip) => {
+    if (!closest) return chip;
+
+    const chipCenter = chip.offsetLeft + chip.offsetWidth / 2;
+    const closestCenter = closest.offsetLeft + closest.offsetWidth / 2;
+
+    return Math.abs(chipCenter - containerCenter) <
+      Math.abs(closestCenter - containerCenter)
+      ? chip
+      : closest;
+  }, null);
+
+  const slug = closestChip?.dataset.slug;
+
+  if (slug) {
+    form.subraceSlug = slug;
+  }
+}
+
+function fixedLanguages(languages?: string[]) {
+  return (languages || []).filter((language) => !isLanguageChoice(language));
+}
+
+function countLanguageChoices(languages?: string[]) {
+  return (languages || []).reduce(
+    (total, language) => total + languageChoiceCount(language),
+    0,
+  );
+}
+
+function languageChoiceCount(language: string) {
+  const normalized = language.toLowerCase();
+
+  if (!isLanguageChoice(language)) return 0;
+  if (normalized.includes('dos')) return 2;
+  if (normalized.includes('tres')) return 3;
+
+  return 1;
+}
+
+function isLanguageChoice(language: string) {
+  const normalized = language.toLowerCase();
+
+  return (
+    normalized.includes('adicional') ||
+    normalized.includes('elección') ||
+    normalized.includes('eleccion')
+  );
+}
+
+function trimLanguageChoices() {
+  const allowed = form.languageChoices
+    .filter((language) => availableLanguageOptions.value.includes(language))
+    .slice(0, languageChoiceSlots.value);
+
+  form.languageChoices.splice(0, form.languageChoices.length, ...allowed);
+}
+
+function setDefaultEquipmentSelections() {
+  for (const key of Object.keys(form.equipmentSelections)) {
+    delete form.equipmentSelections[key];
+  }
+
+  for (const group of equipmentGroups.value) {
+    form.equipmentSelections[group.key] = group.options[0] || '';
+  }
+}
+
+function trimSkillChoices() {
+  const allowed = form.skillChoices
+    .filter((skill) => skillChoicePool.value.includes(skill))
+    .filter((skill) => !fixedSkillProficiencies.value.includes(skill))
+    .slice(0, skillChoiceSlots.value);
+
+  form.skillChoices.splice(0, form.skillChoices.length, ...allowed);
+}
+
+function uniqueValues(values: string[]) {
+  return [...new Set(values.filter(Boolean))];
 }
 
 function createEmptyAbilityBonuses(): Record<AbilityKey, number> {
@@ -477,6 +914,18 @@ async function handleCreate() {
     return;
   }
 
+  if (form.languageChoices.length < languageChoiceSlots.value) {
+    errorMessage.value = 'Completa los idiomas a tu elección.';
+    currentStep.value = 5;
+    return;
+  }
+
+  if (form.skillChoices.length < skillChoiceSlots.value) {
+    errorMessage.value = 'Completa las habilidades a tu elección.';
+    currentStep.value = 5;
+    return;
+  }
+
   const character = await charactersStore.createCharacter({
     name: form.name,
     raceId: form.raceId,
@@ -486,6 +935,9 @@ async function handleCreate() {
     alignment: form.alignment,
     appearance: form.appearance,
     abilities: finalAbilities.value,
+    languages: finalLanguages.value,
+    skillProficiencies: skillProficiencies.value,
+    equipment: selectedEquipment.value,
   });
 
   router.push(`/characters/${character._id}`);
@@ -618,11 +1070,14 @@ async function handleCreate() {
   gap: 8px;
   overflow-x: auto;
   padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
   scrollbar-width: thin;
+  touch-action: pan-x;
 }
 
 .subrace-chip {
   flex: 0 0 138px;
+  scroll-snap-align: center;
   min-height: 76px;
   padding: 10px;
   cursor: pointer;
@@ -660,6 +1115,43 @@ async function handleCreate() {
   }
 }
 
+.subclass-preview-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+}
+
+.subclass-preview-chip {
+  flex: 0 0 168px;
+  min-height: 112px;
+  padding: 10px;
+  text-align: left;
+  cursor: default;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(198, 161, 91, 0.16);
+  border-radius: 12px;
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    color: var(--rp-gold-primary);
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  small {
+    margin-top: 7px;
+    color: var(--rp-text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+}
+
 .subrace-summary {
   min-height: 84px;
 }
@@ -682,6 +1174,100 @@ async function handleCreate() {
 
   strong {
     color: var(--rp-gold-primary);
+  }
+}
+
+.character-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.option-panel {
+  min-height: 160px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(198, 161, 91, 0.14);
+  border-radius: 14px;
+
+  h3 {
+    margin-bottom: 12px;
+    font-family: 'Cinzel', serif;
+    color: var(--rp-gold-primary);
+    font-size: 1rem;
+  }
+}
+
+.equipment-panel {
+  grid-column: 1 / -1;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  color: var(--rp-text-primary);
+  background: rgba(198, 161, 91, 0.1);
+  border: 1px solid rgba(198, 161, 91, 0.16);
+  border-radius: 999px;
+  font-size: 0.82rem;
+
+  &.locked {
+    background: rgba(198, 161, 91, 0.16);
+    border-color: rgba(198, 161, 91, 0.28);
+  }
+}
+
+.equipment-choice {
+  display: grid;
+  grid-template-columns: minmax(110px, 140px) 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid rgba(198, 161, 91, 0.1);
+
+  > span:first-child {
+    color: var(--rp-text-secondary);
+    font-size: 0.84rem;
+  }
+}
+
+.equipment-choice:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.equipment-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice-pill {
+  min-height: 34px;
+  padding: 7px 12px;
+  color: var(--rp-text-primary);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(198, 161, 91, 0.18);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &.selected {
+    color: #0f0f11;
+    background: var(--rp-gold-primary);
+    border-color: var(--rp-gold-primary);
   }
 }
 
@@ -738,6 +1324,14 @@ async function handleCreate() {
   }
 
   .detail-block ul {
+    grid-template-columns: 1fr;
+  }
+
+  .character-options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .equipment-choice {
     grid-template-columns: 1fr;
   }
 

@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsMongoId,
   IsObject,
   IsOptional,
@@ -35,6 +36,21 @@ export class CreateCharacterDto {
 
   @IsObject()
   abilities: AbilitiesDto;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  languages?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skillProficiencies?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  equipment?: string[];
 
   @IsOptional()
   @IsString()

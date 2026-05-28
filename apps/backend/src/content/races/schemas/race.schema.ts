@@ -44,6 +44,15 @@ class Subrace {
   @Prop({ type: [String], default: [] })
   languages: string[];
 
+  @Prop({ type: [String], default: [] })
+  skillProficiencies: string[];
+
+  @Prop({ type: [String], default: [] })
+  skillChoices: string[];
+
+  @Prop({ default: 0 })
+  numberOfSkillChoices: number;
+
   @Prop({ default: null })
   imageUrl?: string;
 }
@@ -90,6 +99,23 @@ export class Race {
     default: [],
   })
   languages: string[];
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  skillProficiencies: string[];
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  skillChoices: string[];
+
+  @Prop({
+    default: 0,
+  })
+  numberOfSkillChoices: number;
 
   @Prop({
     type: [String],

@@ -14,6 +14,9 @@ export interface Subrace {
   abilityBonuses: AbilityBonuses;
   traits: string[];
   languages: string[];
+  skillProficiencies?: string[];
+  skillChoices?: string[];
+  numberOfSkillChoices?: number;
   imageUrl?: string | null;
 }
 
@@ -27,6 +30,9 @@ export interface Race {
   speed: number;
   abilityBonuses: AbilityBonuses;
   languages: string[];
+  skillProficiencies?: string[];
+  skillChoices?: string[];
+  numberOfSkillChoices?: number;
   traits: string[];
   imageUrl?: string | null;
   subraces: Subrace[];
@@ -48,10 +54,27 @@ export interface CharacterClass {
     numberOfSkillChoices: number;
   };
   startingEquipment: string[];
+  startingEquipmentChoices?: {
+    label: string;
+    options: string[];
+  }[];
   featuresByLevel: {
     level: number;
     name: string;
     description: string;
+  }[];
+  subclassSelectionLabel: string;
+  subclassLevel: number;
+  subclasses: {
+    name: string;
+    slug: string;
+    description: string;
+    featuresByLevel: {
+      level: number;
+      name: string;
+      description: string;
+    }[];
+    imageUrl?: string | null;
   }[];
   spellcastingAbility?: string | null;
   isSpellcaster: boolean;

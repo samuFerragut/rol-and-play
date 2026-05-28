@@ -16,6 +16,24 @@ class ClassFeature {
 }
 
 @Schema({ _id: false })
+class ClassSubclass {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  slug: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ type: [ClassFeature], default: [] })
+  featuresByLevel: ClassFeature[];
+
+  @Prop({ default: null })
+  imageUrl?: string;
+}
+
+@Schema({ _id: false })
 class ClassProficiencies {
   @Prop({ type: [String], default: [] })
   armor: string[];
@@ -34,6 +52,15 @@ class ClassProficiencies {
 
   @Prop({ default: 0 })
   numberOfSkillChoices: number;
+}
+
+@Schema({ _id: false })
+class StartingEquipmentChoice {
+  @Prop({ required: true })
+  label: string;
+
+  @Prop({ type: [String], default: [] })
+  options: string[];
 }
 
 @Schema({ timestamps: true, collection: 'classes' })
@@ -59,8 +86,20 @@ export class CharacterClass {
   @Prop({ type: [String], default: [] })
   startingEquipment: string[];
 
+  @Prop({ type: [StartingEquipmentChoice], default: [] })
+  startingEquipmentChoices: StartingEquipmentChoice[];
+
   @Prop({ type: [ClassFeature], default: [] })
   featuresByLevel: ClassFeature[];
+
+  @Prop({ default: 'Subclase' })
+  subclassSelectionLabel: string;
+
+  @Prop({ default: 3 })
+  subclassLevel: number;
+
+  @Prop({ type: [ClassSubclass], default: [] })
+  subclasses: ClassSubclass[];
 
   @Prop({ default: null })
   spellcastingAbility?: string;

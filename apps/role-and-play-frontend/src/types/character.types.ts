@@ -16,6 +16,9 @@ export interface CreateCharacterPayload {
   classId: string;
   backgroundId: string;
   abilities: CharacterAbilities;
+  languages?: string[];
+  skillProficiencies?: string[];
+  equipment?: string[];
   alignment?: string;
   appearance?: string;
   personalityTraits?: string;
@@ -37,6 +40,9 @@ export interface Character {
   level: number;
   experience: number;
   abilities: CharacterAbilities;
+  languages: string[];
+  skillProficiencies: string[];
+  equipment: string[];
   alignment?: string;
   appearance?: string;
   personalityTraits?: string;

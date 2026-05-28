@@ -105,6 +105,24 @@ export class Character {
   abilities: CharacterAbilities;
 
   @Prop({
+    type: [String],
+    default: [],
+  })
+  languages: string[];
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  skillProficiencies: string[];
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  equipment: string[];
+
+  @Prop({
     default: '',
   })
   alignment: string;
