@@ -11,8 +11,9 @@
           :key="item._id"
           class="embla__slide"
         >
-          <button
-            type="button"
+          <div
+            role="button"
+            tabindex="0"
             class="selection-card"
             :class="{
               selected: selectedId === item._id,
@@ -21,6 +22,8 @@
               next: selectedIndex === index - 1,
             }"
             @click="selectItem(item._id, index)"
+            @keydown.enter.prevent="selectItem(item._id, index)"
+            @keydown.space.prevent="selectItem(item._id, index)"
           >
             <div class="card-image">
               <v-icon
@@ -35,8 +38,15 @@
             <div class="card-content">
               <h3>{{ item.name }}</h3>
               <p>{{ item.description }}</p>
+
+              <slot
+                name="details"
+                :item="item"
+                :is-selected="selectedId === item._id"
+                :is-active="selectedIndex === index"
+              />
             </div>
-          </button>
+          </div>
         </div>
       </div>
     </div>
@@ -133,6 +143,18 @@ watch(
   },
 );
 
+watch(
+  () => [props.items, props.selectedId] as const,
+  ([items, selectedId]) => {
+    if (!selectedId && items[0]) {
+      emit("select", items[0]._id);
+    }
+  },
+  {
+    immediate: true,
+  },
+);
+
 function selectItem(id: string, index: number) {
   emit("select", id);
   emblaApi.value?.scrollTo(index);
@@ -184,8 +206,8 @@ function scrollTo(index: number) {
 
 .selection-card {
   width: 100%;
-  max-width: 330px;
-  min-height: 420px;
+  max-width: 380px;
+  min-height: 560px;
 
   cursor: pointer;
   overflow: hidden;
@@ -237,7 +259,7 @@ function scrollTo(index: number) {
 }
 
 .card-image {
-  height: 165px;
+  height: 140px;
 
   display: flex;
   align-items: center;
@@ -262,6 +284,9 @@ function scrollTo(index: number) {
 
 .card-content {
   padding: 22px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
   h3 {
     margin-bottom: 12px;
@@ -325,8 +350,8 @@ function scrollTo(index: number) {
   }
 
   .selection-card {
-    max-width: 360px;
-    min-height: 450px;
+    max-width: 420px;
+    min-height: 590px;
   }
 
   .embla__slide:not(:has(.selection-card.active)) {
@@ -340,7 +365,7 @@ function scrollTo(index: number) {
   }
 
   .selection-card {
-    max-width: 380px;
+    max-width: 440px;
   }
 }
 
@@ -355,8 +380,8 @@ function scrollTo(index: number) {
 
   .selection-card {
     width: 100%;
-    max-width: 280px;
-    min-height: 390px;
+    max-width: 330px;
+    min-height: 560px;
     transform: scale(0.92);
   }
 
@@ -365,7 +390,7 @@ function scrollTo(index: number) {
   }
 
   .card-image {
-    height: 135px;
+    height: 120px;
   }
 
   .card-content {

@@ -66,60 +66,64 @@
             :items="contentStore.races"
             :selected-id="form.raceId"
             @select="handleRaceSelect"
-          />
-
-          <div
-            v-if="currentStep === 2 && selectedRace"
-            class="choice-details mt-6"
           >
-            <div class="detail-panel">
-              <h3>{{ selectedRace.name }}</h3>
-              <p>{{ selectedRace.description }}</p>
-
-              <div class="detail-tags">
-                <span>Tamaño: {{ selectedRace.size }}</span>
-                <span>Velocidad: {{ selectedRace.speed }}</span>
-                <span>{{ formatAbilityBonuses(selectedRace.abilityBonuses) }}</span>
-              </div>
-
+            <template #details="{ isSelected }">
               <div
-                v-if="selectedRace.traits.length"
-                class="detail-block"
+                v-if="isSelected && selectedRace"
+                class="card-extra"
               >
-                <h4>Rasgos</h4>
-                <ul>
-                  <li
-                    v-for="trait in selectedRace.traits"
-                    :key="trait"
-                  >
-                    {{ trait }}
-                  </li>
-                </ul>
-              </div>
+                <div class="detail-tags">
+                  <span>Tamaño: {{ selectedRace.size }}</span>
+                  <span>Velocidad: {{ selectedRace.speed }}</span>
+                  <span>{{ formatAbilityBonuses(selectedRace.abilityBonuses) }}</span>
+                </div>
 
-              <div
-                v-if="selectedRace.subraces.length"
-                class="subrace-picker"
-              >
-                <h4>{{ selectedRace.selectionLabel || 'Subraza' }}</h4>
+                <div
+                  v-if="selectedRace.traits.length"
+                  class="detail-block"
+                >
+                  <h4>Rasgos</h4>
+                  <ul>
+                    <li
+                      v-for="trait in selectedRace.traits"
+                      :key="trait"
+                    >
+                      {{ trait }}
+                    </li>
+                  </ul>
+                </div>
 
-                <div class="subrace-grid">
-                  <button
-                    v-for="subrace in selectedRace.subraces"
-                    :key="subrace.slug"
-                    type="button"
-                    class="subrace-card"
-                    :class="{ selected: form.subraceSlug === subrace.slug }"
-                    @click="form.subraceSlug = subrace.slug"
-                  >
-                    <strong>{{ subrace.name }}</strong>
-                    <span>{{ subrace.description }}</span>
-                    <small>{{ formatAbilityBonuses(subrace.abilityBonuses) }}</small>
-                  </button>
+                <div
+                  v-if="selectedRace.subraces.length > 1"
+                  class="subrace-picker"
+                >
+                  <h4>{{ selectedRace.selectionLabel || 'Subraza' }}</h4>
+
+                  <div class="subrace-carousel">
+                    <button
+                      v-for="subrace in selectedRace.subraces"
+                      :key="subrace.slug"
+                      type="button"
+                      class="subrace-chip"
+                      :class="{ selected: form.subraceSlug === subrace.slug }"
+                      @click.stop="form.subraceSlug = subrace.slug"
+                    >
+                      <strong>{{ subrace.name }}</strong>
+                      <small>{{ formatAbilityBonuses(subrace.abilityBonuses) }}</small>
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  v-if="selectedSubrace"
+                  class="detail-block subrace-summary"
+                >
+                  <h4>{{ selectedSubrace.name }}</h4>
+                  <p>{{ selectedSubrace.description }}</p>
                 </div>
               </div>
-            </div>
-          </div>
+            </template>
+          </SelectionGrid>
 
           <SelectionGrid
             v-if="currentStep === 3"
@@ -127,27 +131,24 @@
             :items="contentStore.classes"
             :selected-id="form.classId"
             @select="form.classId = $event"
-          />
-
-          <div
-            v-if="currentStep === 3 && selectedClass"
-            class="choice-details mt-6"
           >
-            <div class="detail-panel">
-              <h3>{{ selectedClass.name }}</h3>
-              <p>{{ selectedClass.description }}</p>
+            <template #details="{ isSelected }">
+              <div
+                v-if="isSelected && selectedClass"
+                class="card-extra"
+              >
+                <div class="detail-tags">
+                  <span>Dado de golpe: {{ selectedClass.hitDice }}</span>
+                  <span>{{ selectedClass.isSpellcaster ? 'Lanzador de conjuros' : 'Marcial' }}</span>
+                </div>
 
-              <div class="detail-tags">
-                <span>Dado de golpe: {{ selectedClass.hitDice }}</span>
-                <span>{{ selectedClass.isSpellcaster ? 'Lanzador de conjuros' : 'Marcial' }}</span>
+                <div class="detail-block">
+                  <h4>Competencias</h4>
+                  <p>{{ classProficienciesSummary }}</p>
+                </div>
               </div>
-
-              <div class="detail-block">
-                <h4>Competencias</h4>
-                <p>{{ classProficienciesSummary }}</p>
-              </div>
-            </div>
-          </div>
+            </template>
+          </SelectionGrid>
 
           <SelectionGrid
             v-if="currentStep === 4"
@@ -155,27 +156,24 @@
             :items="contentStore.backgrounds"
             :selected-id="form.backgroundId"
             @select="form.backgroundId = $event"
-          />
-
-          <div
-            v-if="currentStep === 4 && selectedBackground"
-            class="choice-details mt-6"
           >
-            <div class="detail-panel">
-              <h3>{{ selectedBackground.name }}</h3>
-              <p>{{ selectedBackground.description }}</p>
+            <template #details="{ isSelected }">
+              <div
+                v-if="isSelected && selectedBackground"
+                class="card-extra"
+              >
+                <div class="detail-block">
+                  <h4>{{ selectedBackground.feature.name }}</h4>
+                  <p>{{ selectedBackground.feature.description }}</p>
+                </div>
 
-              <div class="detail-block">
-                <h4>{{ selectedBackground.feature.name }}</h4>
-                <p>{{ selectedBackground.feature.description }}</p>
+                <div class="detail-block">
+                  <h4>Competencias</h4>
+                  <p>{{ backgroundProficienciesSummary }}</p>
+                </div>
               </div>
-
-              <div class="detail-block">
-                <h4>Competencias</h4>
-                <p>{{ backgroundProficienciesSummary }}</p>
-              </div>
-            </div>
-          </div>
+            </template>
+          </SelectionGrid>
 
           <div
             v-if="currentStep === 5"
@@ -423,7 +421,9 @@ onMounted(async () => {
 
 function handleRaceSelect(raceId: string) {
   form.raceId = raceId;
-  form.subraceSlug = '';
+
+  const race = contentStore.races.find((item) => item._id === raceId);
+  form.subraceSlug = race?.subraces[0]?.slug || '';
 }
 
 function createEmptyAbilityBonuses(): Record<AbilityKey, number> {
@@ -439,7 +439,7 @@ function createEmptyAbilityBonuses(): Record<AbilityKey, number> {
 
 function addAbilityBonuses(
   target: Record<AbilityKey, number>,
-  bonuses?: AbilityBonuses,
+  bonuses?: AbilityBonuses | null,
 ) {
   if (!bonuses) return;
 
@@ -448,7 +448,9 @@ function addAbilityBonuses(
   }
 }
 
-function formatAbilityBonuses(bonuses: AbilityBonuses) {
+function formatAbilityBonuses(bonuses?: AbilityBonuses | null) {
+  if (!bonuses) return 'Sin bono de característica';
+
   const parts = abilities
     .filter((ability) => bonuses[ability.key])
     .map(
@@ -472,12 +474,6 @@ async function handleCreate() {
 
   if (!form.name || !form.raceId || !form.classId || !form.backgroundId) {
     errorMessage.value = 'Completa nombre, raza, clase y trasfondo.';
-    return;
-  }
-
-  if (selectedRace.value?.subraces.length && !form.subraceSlug) {
-    errorMessage.value = `Elige ${selectedRace.value.selectionLabel?.toLowerCase() || 'subraza'}.`;
-    currentStep.value = 2;
     return;
   }
 
@@ -559,52 +555,16 @@ async function handleCreate() {
   color: var(--rp-gold-primary);
 }
 
-.choice-details {
-  max-width: 980px;
-  margin-inline: auto;
-}
-
-.detail-panel {
-  padding: 22px;
-  background: rgba(12, 12, 14, 0.72);
-  border: 1px solid rgba(198, 161, 91, 0.14);
-  border-radius: 16px;
-
-  h3,
-  h4 {
-    font-family: 'Cinzel', serif;
-    color: var(--rp-gold-primary);
-  }
-
-  h3 {
-    margin-bottom: 8px;
-    font-size: 1.25rem;
-  }
-
-  h4 {
-    margin: 18px 0 8px;
-    font-size: 1rem;
-  }
-
-  p,
-  li {
-    color: var(--rp-text-secondary);
-    line-height: 1.55;
-  }
-
-  ul {
-    display: grid;
-    gap: 6px;
-    margin: 0;
-    padding-left: 20px;
-  }
+.card-extra {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(198, 161, 91, 0.14);
 }
 
 .detail-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
 
   span {
     padding: 6px 10px;
@@ -612,21 +572,61 @@ async function handleCreate() {
     background: rgba(198, 161, 91, 0.12);
     border: 1px solid rgba(198, 161, 91, 0.18);
     border-radius: 999px;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
   }
 }
 
-.subrace-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
+.detail-block {
+  margin-top: 14px;
+
+  h4 {
+    margin-bottom: 8px;
+    font-family: 'Cinzel', serif;
+    color: var(--rp-gold-primary);
+    font-size: 0.95rem;
+  }
+
+  p,
+  li {
+    color: var(--rp-text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.42;
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px 12px;
+    margin: 0;
+    padding-left: 18px;
+  }
 }
 
-.subrace-card {
-  min-height: 150px;
-  padding: 16px;
-  text-align: left;
+.subrace-picker {
+  margin-top: 14px;
+
+  h4 {
+    margin-bottom: 8px;
+    font-family: 'Cinzel', serif;
+    color: var(--rp-gold-primary);
+    font-size: 0.95rem;
+  }
+}
+
+.subrace-carousel {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+}
+
+.subrace-chip {
+  flex: 0 0 138px;
+  min-height: 76px;
+  padding: 10px;
   cursor: pointer;
+  text-align: left;
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(198, 161, 91, 0.16);
   border-radius: 12px;
@@ -636,31 +636,32 @@ async function handleCreate() {
     transform 0.2s ease;
 
   strong,
-  span,
   small {
     display: block;
   }
 
   strong {
-    margin-bottom: 8px;
     color: var(--rp-gold-primary);
-  }
-
-  span {
-    color: var(--rp-text-secondary);
-    line-height: 1.45;
+    font-size: 0.82rem;
+    line-height: 1.2;
   }
 
   small {
-    margin-top: 12px;
-    color: var(--rp-text-primary);
+    margin-top: 6px;
+    color: var(--rp-text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.25;
   }
 
   &.selected {
     background: rgba(198, 161, 91, 0.12);
     border-color: var(--rp-gold-primary);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
+}
+
+.subrace-summary {
+  min-height: 84px;
 }
 
 .ability-result {
@@ -736,8 +737,8 @@ async function handleCreate() {
     padding: 20px !important;
   }
 
-  .detail-panel {
-    padding: 18px;
+  .detail-block ul {
+    grid-template-columns: 1fr;
   }
 
   .step-actions {
