@@ -1,0 +1,67 @@
+@use './tokens.scss';
+@use './components/inputs';
+@use './components/buttons';
+@use './components/cards';
+@use './components/auth';
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--rp-bg-primary);
+  color: var(--rp-text-primary);
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-container {
+  padding: var(--rp-spacing-lg);
+}
+
+.rp-card {
+  background: var(--rp-bg-surface);
+  border: 1px solid var(--rp-border-primary);
+  border-radius: var(--rp-radius-md);
+  box-shadow: var(--rp-shadow-md);
+}
+
+.rp-title {
+  font-family: 'Cinzel', serif;
+  color: var(--rp-gold-primary);
+}
+
+.rp-button-primary {
+  background: var(--rp-red-primary) !important;
+  color: white !important;
+  border: 1px solid var(--rp-gold-primary) !important;
+  transition: var(--rp-transition-normal);
+
+  &:hover {
+    background: var(--rp-red-hover) !important;
+  }
+}
+
+.rp-button-secondary {
+  background: var(--rp-bg-elevated) !important;
+  color: var(--rp-text-primary) !important;
+  border: 1px solid var(--rp-gold-dark) !important;
+}
+
+.v-application {
+  background: var(--rp-bg-primary) !important;
+  color: var(--rp-text-primary) !important;
+}

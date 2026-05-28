@@ -1,0 +1,14 @@
+{
+  "name": "rol-and-play",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter role-and-play-frontend dev",
+    "dev:backend": "pnpm --filter backend start:dev",
+    "dev:mongo": "docker compose up -d mongo mongo-express",
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
