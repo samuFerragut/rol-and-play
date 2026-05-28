@@ -23,6 +23,10 @@ export class CreateCharacterDto {
   @IsMongoId()
   raceId: string;
 
+  @IsOptional()
+  @IsString()
+  subraceSlug?: string;
+
   @IsMongoId()
   classId: string;
 

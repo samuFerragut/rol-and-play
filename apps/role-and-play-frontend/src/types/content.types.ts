@@ -21,6 +21,7 @@ export interface Race {
   _id: string;
   name: string;
   slug: string;
+  selectionLabel?: string;
   description: string;
   size: string;
   speed: number;

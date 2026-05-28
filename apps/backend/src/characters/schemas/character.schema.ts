@@ -70,6 +70,11 @@ export class Character {
   raceId: Types.ObjectId;
 
   @Prop({
+    default: '',
+  })
+  subraceSlug: string;
+
+  @Prop({
     type: Types.ObjectId,
     ref: 'CharacterClass',
     required: true,

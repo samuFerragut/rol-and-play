@@ -12,6 +12,7 @@ export interface CharacterAbilities {
 export interface CreateCharacterPayload {
   name: string;
   raceId: string;
+  subraceSlug?: string;
   classId: string;
   backgroundId: string;
   abilities: CharacterAbilities;
@@ -30,6 +31,7 @@ export interface Character {
   _id: string;
   name: string;
   raceId: Race;
+  subraceSlug?: string;
   classId: CharacterClass;
   backgroundId: Background;
   level: number;
